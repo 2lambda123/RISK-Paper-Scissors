@@ -1,2 +1,2 @@
-# Risk
-CSE 260 final project: Risk
+# RISK Paper Scissors
+CSE 260 final project: RISK Paper Scissors
