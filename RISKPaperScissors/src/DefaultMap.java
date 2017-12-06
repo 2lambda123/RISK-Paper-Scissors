@@ -11,9 +11,9 @@ import javafx.scene.image.ImageView;
  */
 public class DefaultMap extends Map {
 	public DefaultMap() {
-		background = new ImageView("file:images/DefaultMap/bg.jpg");
-		seeHandButton = new ImageView("file:images/DefaultMap/handButton.png");
-		endTurnButton = new ImageView("file:images/DefaultMap/endTurnButton.png");
+		background = new ImageView("file:src/images/DefaultMap/bg.jpg");
+		seeHandButton = new ImageView("file:src/images/DefaultMap/handButton.png");
+		endTurnButton = new ImageView("file:src/images/DefaultMap/endTurnButton.png");
 		width = 1604;
 		height = 952;
 		
@@ -231,7 +231,7 @@ public class DefaultMap extends Map {
 
 		territories.parallelStream()
 			.forEach(e -> {
-				e.setImage(new ImageView("file:images/DefaultMap/"+e.getName()+".png"));
+				e.setImage(new ImageView("file:src/images/DefaultMap/"+e.getName()+".png"));
 			});
 	}
 }

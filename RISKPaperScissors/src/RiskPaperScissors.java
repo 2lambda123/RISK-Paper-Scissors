@@ -102,12 +102,12 @@ public class RiskPaperScissors extends Application {
 			});
 		}
 
-		ImageView risk = new ImageView("file:images/risk.png");
-		ImageView paperScissors = new ImageView("file:images/paper scissors.png");
-		ImageView start = new ImageView("file:images/start.png");
-		ImageView about = new ImageView("file:images/about.png");
-		ImageView quit = new ImageView("file:images/quit.png");
-		ImageView bg = new ImageView("file:images/bg.jpg");
+		ImageView risk = new ImageView("file:src/images/risk.png");
+		ImageView paperScissors = new ImageView("file:src/images/paper scissors.png");
+		ImageView start = new ImageView("file:src/images/start.png");
+		ImageView about = new ImageView("file:src/images/about.png");
+		ImageView quit = new ImageView("file:src/images/quit.png");
+		ImageView bg = new ImageView("file:src/images/bg.jpg");
 		StackPane splashPane = new StackPane();
 		splashPane.getChildren().addAll(bg, start, about, quit, risk, paperScissors);
 		for (Node n : splashPane.getChildren()) {
@@ -128,7 +128,7 @@ public class RiskPaperScissors extends Application {
 			dialog.setHeaderText(null);
 			dialog.setContentText("How many computer players do you want to play against?");
 			try {
-				numPlayers = dialog.showAndWait().get();
+				numPlayers = dialog.showAndWait().get() + 1;
 			} catch (NoSuchElementException ex) {
 				numPlayers = DEFAULT_PLAYERS;
 			}
@@ -427,13 +427,13 @@ public class RiskPaperScissors extends Application {
 			game.show();
 		} else {
 			StackPane about = new StackPane();
-			ImageView backButton = new ImageView("file:images/backButton.png");
+			ImageView backButton = new ImageView("file:src/images/backButton.png");
 			backButton.setOnMouseClicked(e -> {
 				game.close();
 				game.setScene(splashScreen);
 				game.show();
 			});
-			about.getChildren().addAll(new ImageView("file:images/aboutScreen.jpg"), backButton);
+			about.getChildren().addAll(new ImageView("file:src/images/aboutScreen.jpg"), backButton);
 			aboutScreen = new Scene(about, 800, 450);
 			game.close();
 			game.setScene(aboutScreen);
@@ -445,14 +445,14 @@ public class RiskPaperScissors extends Application {
 	private void showAttackScreen(Territory atk, Territory dfnd) {
 		if (attackScreenInitialized) {
 			attackImages.getChildren().removeAll(attackImages.getChildren());
-			attackImages.getChildren().add(new ImageView("file:images/attackBG.jpg"));
+			attackImages.getChildren().add(new ImageView("file:src/images/attackBG.jpg"));
 			updateAttackScreen(atk.getPlayer(), true);
 			updateAttackScreen(dfnd.getPlayer(), false);
 			game.setScene(attackScreen);
 		} else {
 			game.close();
 			attackImages = new Pane();
-			attackImages.getChildren().add(new ImageView("file:images/attackBG.jpg"));
+			attackImages.getChildren().add(new ImageView("file:src/images/attackBG.jpg"));
 			attackPane.getChildren().add(attackImages);
 			updateAttackScreen(atk.getPlayer(), true);
 			updateAttackScreen(dfnd.getPlayer(), false);
@@ -475,22 +475,22 @@ public class RiskPaperScissors extends Application {
 		Player.atkType choice = t.getPlayer().getAttackType();
 		switch (choice) {
 		case ROCK_ATTACK:
-			img = new ImageView("file:images/rockAtk.png");
+			img = new ImageView("file:src/images/rockAtk.png");
 			break;
 		case PAPER_ATTACK:
-			img = new ImageView("file:images/paperAtk.png");
+			img = new ImageView("file:src/images/paperAtk.png");
 			break;
 		case SCISSORS_ATTACK:
-			img = new ImageView("file:images/scissorsAtk.png");
+			img = new ImageView("file:src/images/scissorsAtk.png");
 			break;
 		case ROCK_DEFEND:
-			img = new ImageView("file:images/rockDfn.png");
+			img = new ImageView("file:src/images/rockDfn.png");
 			break;
 		case PAPER_DEFEND:
-			img = new ImageView("file:images/paperDfn.png");
+			img = new ImageView("file:src/images/paperDfn.png");
 			break;
 		case SCISSORS_DEFEND:
-			img = new ImageView("file:images/scissorsDfn.png");
+			img = new ImageView("file:src/images/scissorsDfn.png");
 			break;
 		}
 		if (p.isHuman() && attackScreen.getOnKeyPressed() == null) {
