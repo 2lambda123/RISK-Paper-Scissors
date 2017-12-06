@@ -170,7 +170,7 @@ public class Player {
 	
 	public int getAttackingArmies() {
 		if (!isHuman)
-			return attackingWith.getArmies() - 1;
+			return numAttackingArmies;
 		else {
 			if (hasArmiesChosen)
 				return numAttackingArmies;

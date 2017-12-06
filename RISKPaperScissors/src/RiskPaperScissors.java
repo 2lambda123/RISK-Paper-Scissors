@@ -3,6 +3,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
 
@@ -16,6 +18,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.InnerShadow;
@@ -58,13 +61,15 @@ public class RiskPaperScissors extends Application {
 	private static final Random RNG = new Random();
 	private static final Color DEFAULT_PLAYER_COLOR = Color.GREEN;
 	private static final String DEFAULT_PLAYER_COLOR_STRING = "GREEN";
-	private static final int DEFAULT_PLAYERS = 6;
+	private static final int DEFAULT_PLAYERS = 3;
+	private static final int MAX_NUM_PLAYERS = 6;
 	private static final int[] STARTING_ARMIES = { 0, 0, 40, 35, 30, 25, 20 };
 	private static final int MINIMUM_ARMIES = 3;
 	private static final int NUM_TYPES_OF_CARDS = 3;
 	private static final int MAX_HAND_SIZE = 7;
-	//private static final int MAX_NUM_OF_ATTACKS = 5;
+	// private static final int MAX_NUM_OF_ATTACKS = 5;
 	private int playerIndex;
+	private int numPlayers;
 
 	@Override
 	public void start(Stage arg0) throws Exception {
@@ -113,6 +118,20 @@ public class RiskPaperScissors extends Application {
 			}
 		}
 		start.setOnMouseClicked(e -> {
+			List<Integer> choices = new ArrayList<>();
+			for (int i = 1; i < MAX_NUM_PLAYERS; i++) {
+				choices.add(i);
+			}
+
+			ChoiceDialog<Integer> dialog = new ChoiceDialog<>(1, choices);
+			dialog.setTitle("Choose Players");
+			dialog.setHeaderText(null);
+			dialog.setContentText("How many computer players do you want to play against?");
+			try {
+				numPlayers = dialog.showAndWait().get();
+			} catch (NoSuchElementException ex) {
+				numPlayers = DEFAULT_PLAYERS;
+			}
 			initialize();
 		});
 		quit.setOnMouseClicked(e -> {
@@ -153,17 +172,12 @@ public class RiskPaperScissors extends Application {
 
 	public void nextTurn() {
 		Territory attacker = null, defender = null;
-		playerIndex++;
-		if (playerIndex > DEFAULT_PLAYERS - 1)
-			playerIndex = 0;
-		currentPlayer = players.get(playerIndex);
-
-		while (currentPlayer.getTerritories().size() == 0) {
+		do {
 			playerIndex++;
-			if (playerIndex > DEFAULT_PLAYERS - 1)
+			if (playerIndex == numPlayers)
 				playerIndex = 0;
 			currentPlayer = players.get(playerIndex);
-		}
+		} while (currentPlayer.getTerritories().size() == 0);
 
 		alert("Next Turn", "It is now " + currentPlayer + "'s turn.");
 
@@ -183,6 +197,7 @@ public class RiskPaperScissors extends Application {
 			defender = currentPlayer.getAttacking();
 			if (defender.getPlayer().isHuman())
 				defender.getPlayer().selectAttackType(false);
+			currentPlayer.setAttackingArmies(attacker.getArmies() - 1);
 			battle(attacker, defender, currentPlayer.getAttackingArmies());
 			// }
 		}
@@ -214,7 +229,7 @@ public class RiskPaperScissors extends Application {
 			players.add(new Player(name, true, DEFAULT_PLAYER_COLOR, this));
 
 			alert("Welcome", "Welcome " + name + ". Your color is " + DEFAULT_PLAYER_COLOR_STRING + ".");
-			for (int i = 1; i < DEFAULT_PLAYERS; i++) {
+			for (int i = 1; i < numPlayers; i++) {
 				Color c = colorsList.remove(RNG.nextInt(colorsList.size()));
 				players.add(new Player("CPU" + i, false, c, this));
 			}
@@ -259,7 +274,7 @@ public class RiskPaperScissors extends Application {
 				alert("Territory Aquisition", p.getName() + " receives " + c + ".");
 			}
 			playerIndex++;
-			if (playerIndex == DEFAULT_PLAYERS)
+			if (playerIndex == numPlayers)
 				playerIndex = 0;
 		}
 	}
@@ -276,7 +291,7 @@ public class RiskPaperScissors extends Application {
 	}
 
 	public void placeInitialArmies(Player p) {
-		p.setFreeArmies(STARTING_ARMIES[DEFAULT_PLAYERS]);
+		p.setFreeArmies(STARTING_ARMIES[numPlayers]);
 		if (p.isHuman()) {
 			alert("Place Initial Armies",
 					p + ", you have " + p.getFreeArmies() + "  armies to place in your territories.");
@@ -286,7 +301,7 @@ public class RiskPaperScissors extends Application {
 
 			boolean finished = false;
 			while (!finished) {
-				p.setFreeArmies(STARTING_ARMIES[DEFAULT_PLAYERS]);
+				p.setFreeArmies(STARTING_ARMIES[numPlayers]);
 				for (Territory t : p.getTerritories()) {
 					t.setArmies(0);
 				}
@@ -497,18 +512,17 @@ public class RiskPaperScissors extends Application {
 					}
 				});
 			} else {
-				int atkArmies = currentPlayer.getAttackingArmies();
 				alert("Defend", "Use the number keys to choose a defense. \n8 for Rock \n9 for Paper \n0 for Scissors");
 				attackScreen.setOnKeyPressed(e -> {
 					if (e.getCode() == KeyCode.DIGIT8) {
 						p.setAttackType(Player.atkType.ROCK_DEFEND);
-						battle(attacker, defender, atkArmies);
+						battle(attacker, defender, currentPlayer.getAttackingArmies());
 					} else if (e.getCode() == KeyCode.DIGIT9) {
 						p.setAttackType(Player.atkType.PAPER_DEFEND);
-						battle(attacker, defender, atkArmies);
+						battle(attacker, defender, currentPlayer.getAttackingArmies());
 					} else if (e.getCode() == KeyCode.DIGIT0) {
 						p.setAttackType(Player.atkType.SCISSORS_DEFEND);
-						battle(attacker, defender, atkArmies);
+						battle(attacker, defender, currentPlayer.getAttackingArmies());
 					}
 				});
 			}
@@ -561,7 +575,7 @@ public class RiskPaperScissors extends Application {
 		} else {
 			results.setText("It's a tie!");
 		}
-		
+
 		if (atkP.isHuman() || dfnP.isHuman())
 			showAttackScreen(attacker, defender);
 
