@@ -68,6 +68,7 @@ public class Territory {
 			numArmies++;
 			System.out.println(this + " now has " + numArmies + " armies");
 			player.setFreeArmies(player.getFreeArmies() - 1);
+			player.getGame().setArmyText(player.getFreeArmies()+" armies left.");
 			if (player.getFreeArmies() == 0) {
 				if (player.getGame().checkTerritories(player)) {
 					for (Territory t : player.getTerritories())
@@ -88,9 +89,11 @@ public class Territory {
 			numArmies++;
 			System.out.println(this + " now has " + numArmies + " armies");
 			player.setFreeArmies(player.getFreeArmies() - 1);
+			player.getGame().setArmyText(player.getFreeArmies()+" armies left.");
 			if (player.getFreeArmies() == 0) {
 				for (Territory t : player.getTerritories())
 					t.disable();
+				player.getGame().setArmyText("");
 				player.getGame().alert("Armies Placed", "Armies placed. Make as many attacks as you wish.");
 				player.chooseTerritory();
 			}
@@ -99,6 +102,7 @@ public class Territory {
 
 	public void selectMode() {
 		img.setOnMouseClicked(e -> {
+			player.getGame().setArmyText("");
 			if (validAdjacents().size() == 0)
 				player.getGame().alert("No Valid Adjacents", "This territory has no valid adjacent territories!");
 			else if (numArmies == 1)
@@ -135,7 +139,7 @@ public class Territory {
 		});
 	}
 
-	private void disable() {
+	public void disable() {
 		img.setOnMouseClicked(null);
 		img.setEffect(getColor());
 	}

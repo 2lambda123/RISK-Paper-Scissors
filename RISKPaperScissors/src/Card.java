@@ -12,13 +12,13 @@ public class Card {
 		this.armyType = armyType;
 		switch (armyType) {
 		case 1:
-			img = new ImageView("file:src/images/rock.png");
+			img = new ImageView("file:resources/rock.png");
 			break;
 		case 2:
-			img = new ImageView("file:src/images/paper.png");
+			img = new ImageView("file:resources/paper.png");
 			break;
 		case 3:
-			img = new ImageView("file:src/images/scissors.png");
+			img = new ImageView("file:resources/scissors.png");
 			break;
 		}
 		selected = false;

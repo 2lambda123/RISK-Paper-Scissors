@@ -52,6 +52,7 @@ public class RiskPaperScissors extends Application {
 	private VBox attackPane;
 	private Pane attackImages;
 	private Text results;
+	private Text numArmies;
 
 	private int originalAttackingArmies;
 	private boolean armiesLocked;
@@ -88,6 +89,10 @@ public class RiskPaperScissors extends Application {
 		attackPane.setAlignment(Pos.CENTER);
 		attackScreen = new Scene(attackPane, 640, 510);
 		attackScreenInitialized = false;
+		numArmies = new Text();
+		numArmies.setX(75);
+		numArmies.setY(900);
+		numArmies.setFont(Font.font("Stencil", 40));
 
 		int type = 1;
 		for (Territory t : territories) {
@@ -102,12 +107,12 @@ public class RiskPaperScissors extends Application {
 			});
 		}
 
-		ImageView risk = new ImageView("file:src/images/risk.png");
-		ImageView paperScissors = new ImageView("file:src/images/paper scissors.png");
-		ImageView start = new ImageView("file:src/images/start.png");
-		ImageView about = new ImageView("file:src/images/about.png");
-		ImageView quit = new ImageView("file:src/images/quit.png");
-		ImageView bg = new ImageView("file:src/images/bg.jpg");
+		ImageView risk = new ImageView("file:resources/risk.png");
+		ImageView paperScissors = new ImageView("file:resources/paper scissors.png");
+		ImageView start = new ImageView("file:resources/start.png");
+		ImageView about = new ImageView("file:resources/about.png");
+		ImageView quit = new ImageView("file:resources/quit.png");
+		ImageView bg = new ImageView("file:resources/bg.jpg");
 		StackPane splashPane = new StackPane();
 		splashPane.getChildren().addAll(bg, start, about, quit, risk, paperScissors);
 		for (Node n : splashPane.getChildren()) {
@@ -241,6 +246,7 @@ public class RiskPaperScissors extends Application {
 			gameplayPane = new Pane();
 			ImageView bg = map.getBackground();
 			gameplayPane.getChildren().add(bg);
+			gameplayPane.getChildren().add(numArmies);
 
 			for (Territory t : map.getTerritories()) {
 				ImageView img = t.getImage();
@@ -293,12 +299,34 @@ public class RiskPaperScissors extends Application {
 	public void placeInitialArmies(Player p) {
 		p.setFreeArmies(STARTING_ARMIES[numPlayers]);
 		if (p.isHuman()) {
+			numArmies.setText(p.getFreeArmies() + " armies left.");
 			alert("Place Initial Armies",
 					p + ", you have " + p.getFreeArmies() + "  armies to place in your territories.");
+
+			gameplayScreen.setOnKeyPressed(e -> {
+				if (e.getCode() == KeyCode.TAB) {
+					boolean finished = false;
+					while (!finished) {
+						p.setFreeArmies(STARTING_ARMIES[numPlayers]);
+						for (Territory t : p.getTerritories()) {
+							t.setArmies(0);
+						}
+						while (p.hasArmies()) {
+							p.addArmy();
+						}
+						finished = checkTerritories(p);
+					}
+					for (Territory t : p.getTerritories())
+						t.disable();
+					gameplayScreen.setOnKeyPressed(null);
+					placeNextInitialArmies();
+				}
+			});
+
 			for (Territory t : p.getTerritories())
 				t.addInitialArmiesMode();
 		} else {
-
+			setArmyText("");
 			boolean finished = false;
 			while (!finished) {
 				p.setFreeArmies(STARTING_ARMIES[numPlayers]);
@@ -325,6 +353,7 @@ public class RiskPaperScissors extends Application {
 
 	private void placeArmies(Player p) {
 		if (p.isHuman()) {
+			setArmyText(p.getFreeArmies() + " armies left.");
 			for (Territory t : p.getTerritories())
 				t.addArmyMode();
 		} else {
@@ -402,7 +431,8 @@ public class RiskPaperScissors extends Application {
 		num += p.getTerritories().size() / 3;
 
 		p.setFreeArmies(num);
-		alert("Place Armies", p + " has " + num + " armies to place.");
+		alert("Place Armies", p + " has " + p.getTerritories().size() + " territories. They receive "
+				+ p.getFreeArmies() + " armies  to place.");
 		return num;
 	}
 
@@ -427,13 +457,13 @@ public class RiskPaperScissors extends Application {
 			game.show();
 		} else {
 			StackPane about = new StackPane();
-			ImageView backButton = new ImageView("file:src/images/backButton.png");
+			ImageView backButton = new ImageView("file:resources/backButton.png");
 			backButton.setOnMouseClicked(e -> {
 				game.close();
 				game.setScene(splashScreen);
 				game.show();
 			});
-			about.getChildren().addAll(new ImageView("file:src/images/aboutScreen.jpg"), backButton);
+			about.getChildren().addAll(new ImageView("file:resources/aboutScreen.jpg"), backButton);
 			aboutScreen = new Scene(about, 800, 450);
 			game.close();
 			game.setScene(aboutScreen);
@@ -445,14 +475,14 @@ public class RiskPaperScissors extends Application {
 	private void showAttackScreen(Territory atk, Territory dfnd) {
 		if (attackScreenInitialized) {
 			attackImages.getChildren().removeAll(attackImages.getChildren());
-			attackImages.getChildren().add(new ImageView("file:src/images/attackBG.jpg"));
+			attackImages.getChildren().add(new ImageView("file:resources/attackBG.jpg"));
 			updateAttackScreen(atk.getPlayer(), true);
 			updateAttackScreen(dfnd.getPlayer(), false);
 			game.setScene(attackScreen);
 		} else {
 			game.close();
 			attackImages = new Pane();
-			attackImages.getChildren().add(new ImageView("file:src/images/attackBG.jpg"));
+			attackImages.getChildren().add(new ImageView("file:resources/attackBG.jpg"));
 			attackPane.getChildren().add(attackImages);
 			updateAttackScreen(atk.getPlayer(), true);
 			updateAttackScreen(dfnd.getPlayer(), false);
@@ -475,22 +505,22 @@ public class RiskPaperScissors extends Application {
 		Player.atkType choice = t.getPlayer().getAttackType();
 		switch (choice) {
 		case ROCK_ATTACK:
-			img = new ImageView("file:src/images/rockAtk.png");
+			img = new ImageView("file:resources/rockAtk.png");
 			break;
 		case PAPER_ATTACK:
-			img = new ImageView("file:src/images/paperAtk.png");
+			img = new ImageView("file:resources/paperAtk.png");
 			break;
 		case SCISSORS_ATTACK:
-			img = new ImageView("file:src/images/scissorsAtk.png");
+			img = new ImageView("file:resources/scissorsAtk.png");
 			break;
 		case ROCK_DEFEND:
-			img = new ImageView("file:src/images/rockDfn.png");
+			img = new ImageView("file:resources/rockDfn.png");
 			break;
 		case PAPER_DEFEND:
-			img = new ImageView("file:src/images/paperDfn.png");
+			img = new ImageView("file:resources/paperDfn.png");
 			break;
 		case SCISSORS_DEFEND:
-			img = new ImageView("file:src/images/scissorsDfn.png");
+			img = new ImageView("file:resources/scissorsDfn.png");
 			break;
 		}
 		if (p.isHuman() && attackScreen.getOnKeyPressed() == null) {
@@ -599,6 +629,7 @@ public class RiskPaperScissors extends Application {
 			if (atkP.isHuman())
 				atkP.chooseTerritory();
 			if (gameOver()) {
+				showGameplayScreen();
 				Player winner = territories.get(0).getPlayer();
 				alert("Game Over!", winner + " has conquered all of Earth! They win!");
 				System.exit(0);
@@ -635,5 +666,9 @@ public class RiskPaperScissors extends Application {
 
 	public void addCard(Card c) {
 		deck.add(c);
+	}
+
+	public void setArmyText(String text) {
+		numArmies.setText(text);
 	}
 }

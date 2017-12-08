@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -116,7 +117,7 @@ public class Player {
 			int n = RNG.nextInt(3);
 			if (n == 0)
 				attack = isAttacking ? atkType.ROCK_ATTACK : atkType.ROCK_DEFEND;
-			if (n == 1)
+			else if (n == 1)
 				attack = isAttacking ? atkType.PAPER_ATTACK : atkType.PAPER_DEFEND;
 			else
 				attack = isAttacking ? atkType.SCISSORS_ATTACK : atkType.SCISSORS_DEFEND;
@@ -250,6 +251,9 @@ public class Player {
 						removeCard(c1);
 						removeCard(c2);
 						removeCard(c3);
+						selectedCards.remove(c1);
+						selectedCards.remove(c2);
+						selectedCards.remove(c3);
 						setsTurnedIn++;
 						game.turnInSet(this);
 						return true;
@@ -260,5 +264,9 @@ public class Player {
 	private void removeCard(Card c) {
 		hand.remove(c);
 		game.addCard(c);
+	}
+	
+	public SimpleStringProperty getArmiesProperty() {
+		return new SimpleStringProperty(freeArmies + " armies left");
 	}
 }
