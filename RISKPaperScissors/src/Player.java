@@ -27,6 +27,7 @@ public class Player {
 	private int setsTurnedIn;
 	private boolean hasArmiesChosen;
 	private int numAttackingArmies;
+	private int numAttacks;
 
 	public enum atkType {
 		ROCK_DEFEND, ROCK_ATTACK, PAPER_DEFEND, PAPER_ATTACK, SCISSORS_DEFEND, SCISSORS_ATTACK
@@ -42,6 +43,7 @@ public class Player {
 		freeArmies = 0;
 		setsTurnedIn = 0;
 		numAttackingArmies = 0;
+		numAttacks = 0;
 		hasArmiesChosen = false;
 		hand = new HashSet<Card>();
 		territories = new ArrayList<Territory>();
@@ -95,11 +97,12 @@ public class Player {
 			Alert alert = new Alert(AlertType.CONFIRMATION);
 			alert.setTitle(isAttacking ? "Attack" : "Defend");
 			alert.setHeaderText(null);
-			String msg="";
+			String msg = "";
 			if (isAttacking)
 				msg = "Which attack type will you start with?";
 			else
-				msg = game.currentPlayer().attacking + " is under attack! What attack type do you start defending with?";
+				msg = game.currentPlayer().attacking
+						+ " is under attack! What attack type do you start defending with?";
 			alert.setContentText(msg);
 			ButtonType rock = new ButtonType("Rock");
 			ButtonType paper = new ButtonType("Paper");
@@ -168,7 +171,7 @@ public class Player {
 	public void setAttackingArmies(int armies) {
 		numAttackingArmies = armies;
 	}
-	
+
 	public int getAttackingArmies() {
 		if (!isHuman)
 			return numAttackingArmies;
@@ -179,12 +182,12 @@ public class Player {
 			List<Integer> choices = new ArrayList<Integer>();
 			for (; i < attackingWith.getArmies(); i++)
 				choices.add(i);
-			ChoiceDialog<Integer> armyChooser = new ChoiceDialog<Integer>(i-1, choices);
+			ChoiceDialog<Integer> armyChooser = new ChoiceDialog<Integer>(i - 1, choices);
 			armyChooser.setHeaderText(null);
 			armyChooser.setTitle("Choose Attacking Armies");
 			armyChooser.setContentText("How many armies will you attack with?");
 			numAttackingArmies = armyChooser.showAndWait().get();
-			
+
 			hasArmiesChosen = true;
 			return numAttackingArmies;
 		}
@@ -205,7 +208,7 @@ public class Player {
 	public void stopAttack() {
 		hasArmiesChosen = false;
 	}
-	
+
 	public Territory getAttacking() {
 		return attacking;
 	}
@@ -222,7 +225,7 @@ public class Player {
 	public String toString() {
 		return name;
 	}
-	
+
 	public void selectCard(Card c) {
 		boolean selected = c.select();
 		if (selected) {
@@ -265,8 +268,29 @@ public class Player {
 		hand.remove(c);
 		game.addCard(c);
 	}
-	
+
 	public SimpleStringProperty getArmiesProperty() {
 		return new SimpleStringProperty(freeArmies + " armies left");
+	}
+
+	public void setNumAttacks(int attacks) {
+		numAttacks = attacks;
+	}
+
+	public int getNumAttacks() {
+		return numAttacks;
+	}
+
+	public void autoBattle() {
+		if (numAttacks <= 0)
+			game.nextTurn();
+		else {
+			chooseTerritory();
+			attackTeritory();
+			if (attacking.getPlayer().isHuman())
+				attacking.getPlayer().selectAttackType(false);
+			setAttackingArmies(attackingWith.getArmies() - 1);
+			game.battle(attackingWith, attacking, numAttackingArmies);
+		}
 	}
 }

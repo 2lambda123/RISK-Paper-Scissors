@@ -68,7 +68,7 @@ public class RiskPaperScissors extends Application {
 	private static final int MINIMUM_ARMIES = 3;
 	private static final int NUM_TYPES_OF_CARDS = 3;
 	private static final int MAX_HAND_SIZE = 7;
-	// private static final int MAX_NUM_OF_ATTACKS = 5;
+	private static final int MAX_NUM_OF_ATTACKS = 5;
 	private int playerIndex;
 	private int numPlayers;
 
@@ -176,7 +176,6 @@ public class RiskPaperScissors extends Application {
 	}
 
 	public void nextTurn() {
-		Territory attacker = null, defender = null;
 		do {
 			playerIndex++;
 			if (playerIndex == numPlayers)
@@ -189,22 +188,15 @@ public class RiskPaperScissors extends Application {
 		showGameplayScreen();
 		if (!deck.isEmpty())
 			dealCard(currentPlayer);
+		else
+			alert("Empty Deck", "The deck is empty.");
 		allocateArmies(currentPlayer);
 		placeArmies(currentPlayer);
 
 		if (!currentPlayer.isHuman()) {
 			currentPlayer.checkForMatches();
-			// int attacks = RNG.nextInt((MAX_NUM_OF_ATTACKS - 1) + 1);
-			// for (int i = 0; i < attacks; i++) {
-			currentPlayer.chooseTerritory();
-			attacker = currentPlayer.getAttackingWith();
-			currentPlayer.attackTeritory();
-			defender = currentPlayer.getAttacking();
-			if (defender.getPlayer().isHuman())
-				defender.getPlayer().selectAttackType(false);
-			currentPlayer.setAttackingArmies(attacker.getArmies() - 1);
-			battle(attacker, defender, currentPlayer.getAttackingArmies());
-			// }
+			currentPlayer.setNumAttacks(RNG.nextInt(MAX_NUM_OF_ATTACKS - 1) + 1);
+			currentPlayer.autoBattle();
 		}
 	}
 
@@ -610,7 +602,7 @@ public class RiskPaperScissors extends Application {
 			showAttackScreen(attacker, defender);
 
 		if (attackingWith == 0) {
-			alert("Battle Result", defender + "(" + dfnP + ") defends itself from " + attacker + "(" + atkP + ").");
+			alert("Battle Result", defender + " (" + dfnP + ") defends itself from " + attacker + " (" + atkP + ").");
 			finished = true;
 		} else if (defender.getArmies() == 0) {
 			alert("Battle Result", atkP + " conquers " + defender + "!");
@@ -636,10 +628,10 @@ public class RiskPaperScissors extends Application {
 			}
 			if (atkP.isHuman() || dfnP.isHuman())
 				showGameplayScreen();
-			if (dfnP.isHuman() && !atkP.isHuman())
-				nextTurn();
-			else if (!atkP.isHuman() && !dfnP.isHuman())
-				nextTurn();
+			if (!atkP.isHuman()) {
+				atkP.setNumAttacks(atkP.getNumAttacks() - 1);
+				atkP.autoBattle();
+			}
 		} else if (!atkP.isHuman() && !dfnP.isHuman())
 			battle(attacker, defender, attackingWith);
 	}
